@@ -1,112 +1,192 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, {useState} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  TouchableOpacity
 } from 'react-native';
-
 import {
-  Colors,
-  DebugInstructions,
+  Text,
+  Container,
+  Content,
   Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  Body,
+  Card,
+  H1, H3,
+  Button,
+  Title,
+  NativeBaseProvider
+} from 'native-base'
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import Icons from './components/Icons'
+import Snackbar from 'react-native-snackbar'
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+const itemArray = new Array(9).fill('empty')
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+
+const App =() => {
+
+  const [isCross, setIsCross] = useState(false)
+  const [winMessage, setWinMessage] = useState('')
+
+  const changeItem =(itemNumber) => {
+    if(winMessage){
+      return Snackbar.show({
+        text : winMessage,
+        backgroundColor: '#000',
+        textColor: "#FFF"
+      })
+    }
+
+    if (itemArray[itemNumber] === 'empty') {
+      itemArray[itemNumber] = isCross ? 'cross' : 'circle';
+      setIsCross(!isCross)
+
+    } else {
+      return Snackbar.show({
+        text: "Position is already filled",
+        backgroundColor: "red",
+        color: "#FFF"
+      })
+    }
+
+    checkIsWinner()
+
+  }
+
+  const reloadGame = () => {
+    setIsCross(false)
+    setWinMessage('')
+    itemArray.fill('empty', 0, 9);
+    //
+  }
+  const checkIsWinner = () => {
+    //  checking  winner of the game
+    if (
+      itemArray[0] === itemArray[1] &&
+      itemArray[0] === itemArray[2] &&
+      itemArray[0] !== 'empty'
+    ) {
+      setWinMessage(`${itemArray[0]} won`);
+    } else if (
+      itemArray[3] !== 'empty' &&
+      itemArray[3] === itemArray[4] &&
+      itemArray[4] === itemArray[5]
+    ) {
+      setWinMessage(`${itemArray[3]} won`);
+    } else if (
+      itemArray[6] !== 'empty' &&
+      itemArray[6] === itemArray[7] &&
+      itemArray[7] === itemArray[8]
+    ) {
+      setWinMessage(`${itemArray[6]} won`);
+    } else if (
+      itemArray[0] !== 'empty' &&
+      itemArray[0] === itemArray[3] &&
+      itemArray[3] === itemArray[6]
+    ) {
+      setWinMessage(`${itemArray[0]} won`);
+    } else if (
+      itemArray[1] !== 'empty' &&
+      itemArray[1] === itemArray[4] &&
+      itemArray[4] === itemArray[7]
+    ) {
+      setWinMessage(`${itemArray[1]} won`);
+    } else if (
+      itemArray[2] !== 'empty' &&
+      itemArray[2] === itemArray[5] &&
+      itemArray[5] === itemArray[8]
+    ) {
+      setWinMessage(`${itemArray[2]} won`);
+    } else if (
+      itemArray[0] !== 'empty' &&
+      itemArray[0] === itemArray[4] &&
+      itemArray[4] === itemArray[8]
+    ) {
+      setWinMessage(`${itemArray[0]} won`);
+    } else if (
+      itemArray[2] !== 'empty' &&
+      itemArray[2] === itemArray[4] &&
+      itemArray[4] === itemArray[6]
+    ) {
+      setWinMessage(`${itemArray[2]} won`);
+    }
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+  return(
+    <NativeBaseProvider>
+    <Container style={{backgroundColor: "333945", padding: 5}}>
+      <Header>
+        <Body>
+          <Title>
+            LCO TicTacToe
+          </Title>
+        </Body>
+      </Header>
+      <Content>
+        <View style={styles.grid}>
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+          {itemArray.map((item, index) => (
+            <TouchableOpacity
+            style={styles.box}
+            key={index}
+            onPress={() => changeItem(index)}
+            >
+              <Card style={styles.card}>
+                <Icons name={item}/>
+              </Card>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {winMessage ? (
+          <View>
+            <H1 style={styles.message}>{winMessage}</H1>
+            <Button
+            onPress={reloadGame}
+            primary
+            block
+            rounded
+            >
+              <Text>Reload Game</Text>
+            </Button>
+          </View>
+        ) : (
+          <H3 style={styles.message}>
+            {isCross ? 'Cross' : 'Circle'} turns
+          </H3>
+        )}
+      </Content>
+    </Container>
+    </NativeBaseProvider>
+  )
+}
 
 export default App;
+
+
+const styles = StyleSheet.create({
+  grid: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 20
+  },
+  box: {
+    width: '33%',
+    marginBottom: 6
+  },
+  card: {
+    height: 120,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  message: {
+    textAlign: "center",
+    textTransform: "uppercase",
+    color: "#FFF",
+    marginTop: 20,
+    backgroundColor: "#4652B3",
+    paddingVertical: 10,
+    marginVertical: 10
+  },
+})
